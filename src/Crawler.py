@@ -42,4 +42,4 @@ class webCrawler:
                 self.observed_urls.append(url)
 
 if __name__ == '__main__':
-    webCrawler(urls=['https://www.imdb.com/']).run()
+    webCrawler(urls=['https://www.stackoverflow.com/']).run()
