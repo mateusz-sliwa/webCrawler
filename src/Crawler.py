@@ -1,7 +1,11 @@
+from tkinter import EXCEPTION
 from bs4 import BeautifulSoup
 import logging
 from urllib.parse import urljoin
 import requests
+from requests.models import MissingSchema
+from requests.sessions import InvalidSchema
+import string
 
 logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.INFO)
 
@@ -11,7 +15,7 @@ class webCrawler:
         self.urls_to_observe = urls
 
     def download_url(self, url):
-        return requests.get(url).text
+        return requests.get(url).text.strip()
 
     def get_urls(self, url, html):
         soup = BeautifulSoup(html, 'html.parser')
@@ -33,13 +37,24 @@ class webCrawler:
     def run(self):
         while self.urls_to_observe:
             url = self.urls_to_observe.pop(0)
-            logging.info(f'Crawling: {url}')
+            if url != None:
+                if  url != url.lstrip().startswith('https'):
+                    logging.info(f' Crawling: {url}')
+            else:
+                pass
             try:
                 self.crawl(url)
-            except Exception:
-                logging.exception(f'Failed to crawl: {url}')
+            except (Exception, requests.exceptions.InvalidSchema, requests.exceptions.MissingSchema):
+                if Exception == requests.exceptions.InvalidSchema:
+                    # logging.exception(f'Invalid schema: {url}')
+                    pass
+                elif Exception == requests.exceptions.MissingSchema or MissingSchema:
+                    # logging.exception(f'Missing schema: {url}')
+                    pass
+                else:
+                    logging.exception(f'Failed to crawl: {url}')
             finally:
                 self.observed_urls.append(url)
 
 if __name__ == '__main__':
-    webCrawler(urls=['https://www.stackoverflow.com/']).run()
+    webCrawler(urls=['https://www.theverge.com/']).run()
